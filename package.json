@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@metamask/providers": "^21.0.0",
+    "@reown/walletkit": "^1.2.4",
+    "@walletconnect/core": "^2.20.2",
+    "@walletconnect/utils": "^2.20.2",
     "ethers": "^5.8.0",
     "firebase": "^11.5.0",
     "firebase-admin": "^13.2.0",
