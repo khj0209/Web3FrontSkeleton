@@ -5,8 +5,8 @@ import axios from "axios";
 //moke data
 // contractaddress, abi, bytecode 포함
 const mokeContract = {
-        abi: require("../../SimpleStorage.json").abi,
-        bytecode: require("../../SimpleStorage.json").bytecode,
+        abi: require("../../../SimpleStorage.json").abi,
+        bytecode: require("../../../SimpleStorage.json").bytecode,
     };
 
 interface Contract {

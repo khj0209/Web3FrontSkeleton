@@ -11,7 +11,7 @@ export default function Home() {
     console.log("token", token);
     if (token) {
       setIsLoggedIn(true); // 토큰이 있으면 로그인 상태로 설정
-      router.push("/page1"); // /page1으로 이동
+      // router.push("/page1"); // /page1으로 이동
     }
   }, [router]);
 

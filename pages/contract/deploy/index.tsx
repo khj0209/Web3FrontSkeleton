@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, use } from "react";
 import axios from "axios";
-import ContractList from "../../components/ContractList";
+import ContractList from "../../../components/ContractList";
 import { ethers } from "ethers";
 
 const ContractDeploy = () => {
