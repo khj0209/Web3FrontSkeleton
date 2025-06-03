@@ -1,57 +1,98 @@
-import { useState } from "react";
-import useMetamask from "../../hooks/useMetamask";
+import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 
 const RpcTest = () => {
-    const { account, connectWallet, provider, signer, chainId } = useMetamask();
+    const [account, setAccount] = useState<string>(""); // 예시 지갑 주소
+    const [txHash, setTxHash] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         address: "",
         amount: "",
     });
+    const popup = useRef<Window | null>(null);
+    const unsignedTxRef = useRef({
+        to: "",
+        value: "0",
+    });
+    const WALLET_SERVICE_ORIGIN = process.env.NEXT_PUBLIC_WALLET_ORIGIN;
+    const REDIRECT_URI = window.location.origin;
+    const signUrl = `${WALLET_SERVICE_ORIGIN}/sign?redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+
+    useEffect(() => {
+        const handler = (event: MessageEvent) => {
+            if (event.origin !== WALLET_SERVICE_ORIGIN) return;
+
+            const { type, payload } = event.data;
+            console.log('[App] message 수신:', event.data);
+
+            if (type === 'WALLET_READY') {
+                console.log('[App] 지갑 팝업 준비됨, 트랜잭션 전송');
+                popup.current?.postMessage(
+                    {
+                        type: 'SIGN_REQUEST',
+                        payload: {
+                            unsignedTx : unsignedTxRef.current,
+                            address: sessionStorage.getItem("account") || "",
+                        }
+                    },
+                    WALLET_SERVICE_ORIGIN
+                );
+            }
+    
+            if (type === 'TX_RECEIPT') {
+                console.log('[✅ App 서비스] 트랜잭션 receipt 수신:', payload);
+                // 후처리 로직 가능
+                setTxHash(payload.receipt.hash);
+                if(payload.receipt.status === 0) {
+                    console.error("트랜잭션 실패:", payload.receipt);
+                    alert("트랜잭션이 실패했습니다. 상태를 확인해주세요.");
+                }else {
+                    console.log("트랜잭션 성공:", payload.receipt);
+                    alert("트랜잭션이 성공적으로 처리되었습니다.");
+                }
+                console.log(txHash);
+            }
+        };
+    
+        window.addEventListener('message', handler);
+
+        const interval = setInterval(() => {
+            if (popup.current && popup.current.closed) {
+                console.log('[App] 팝업이 닫혔습니다.');
+                clearInterval(interval);
+            }
+        }, 500);
+
+        return () => {
+            window.removeEventListener('message', handler);
+            clearInterval(interval);
+        };
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const walletAddress = account;
-        if (!walletAddress) {
-            alert("지갑이 연결되지 않았습니다.");
-            return;
-        }
-
-        const submissionData = {
-            ...formData,
-            walletAddress,
-        };
-
-        console.log("제출 데이터:", submissionData);
-        
-        // 서버로 제출 로직 추가
-
+        console.log(`입력 변경: ${name} = ${value}`);
     };
 
     const sendTransaction = async () => {
-        if (!signer) {
-            alert("지갑이 연결되지 않았습니다.");
+        if (!formData.address || !formData.amount) {
+            alert("주소와 금액을 입력해주세요.");
             return;
         }
 
-        const transaction = {
-            to: formData.address,
-            value: ethers.utils.parseEther(formData.amount),
-        };
-
-        // 연결된 메타마스크 지갑을 활용해 이더 전송 트랜잭션
         try {
-            const txResponse = await signer.sendTransaction(transaction);
-            console.log("트랜잭션 응답:", txResponse);
-            alert("트랜잭션이 성공적으로 전송되었습니다.");
+            const amountInWei = ethers.utils.parseEther(formData.amount);
+            unsignedTxRef.current = {
+                to: formData.address,
+                value: amountInWei.toString(),
+            };
+
+            console.log('트랜잭션 데이터:', unsignedTxRef.current);
+
+            popup.current = window.open(signUrl, 'walletPopup', 'width=500,height=700');
         } catch (error) {
-            console.error("트랜잭션 오류:", error);
-            alert("트랜잭션 전송 중 오류가 발생했습니다.");
+            console.error("트랜잭션 전송 실패:", error);
+            alert("트랜잭션 전송에 실패했습니다. 콘솔을 확인해주세요.");
         }
     }
 
@@ -60,7 +101,7 @@ const RpcTest = () => {
             <form className="bg-white p-6 rounded shadow-md max-w-md mx-auto">
             <div className="mb-4">
                 <label className="block text-gray-700 font-medium mb-2">
-                    메타마스크로 보내기
+                    1Q Wallet으로 토큰 보내기
                 </label>
                 <label className="block text-gray-700 font-medium mb-2">
                     주소:

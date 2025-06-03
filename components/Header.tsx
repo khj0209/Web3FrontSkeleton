@@ -1,6 +1,6 @@
 
 import MetamaskButton from "./MetamaskButton";
-import WalletConnectButton from "./WalletConnectButton";
+import MyWalletConnectButton from "./MyWalletConnectButton";
 
 type HeaderProps = {
   title: string;
@@ -13,7 +13,9 @@ const Header = ({title}: HeaderProps) => {
       {/* <h1 className="text-xl font-semibold">{title}</h1> */}
       <h1 className="text-xl font-semibold">{title}</h1>
       {/* <MetamaskButton /> */}
-      <WalletConnectButton />
+      <div className="ml-auto flex space-x-4">
+          <MyWalletConnectButton />
+      </div>
     </header>
     </div>
   );
