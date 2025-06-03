@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev -p 3001 --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -13,6 +13,7 @@
     "@reown/walletkit": "^1.2.4",
     "@walletconnect/core": "^2.20.2",
     "@walletconnect/utils": "^2.20.2",
+    "axios": "^1.9.0",
     "ethers": "^5.8.0",
     "firebase": "^11.5.0",
     "firebase-admin": "^13.2.0",
@@ -25,6 +26,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
