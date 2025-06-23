@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, use } from "react";
 import axios from "axios";
-import ContractList from "../../../components/ContractList";
 import { ethers } from "ethers";
+import { useEffect, useRef, useState } from "react";
+import ContractList from "../../../components/ContractList";
 
 const ContractDeploy = () => {
     const [contractList, setContractList] = useState<any[]>([]);
@@ -66,24 +66,43 @@ const ContractDeploy = () => {
     const handleDeploy = async (cont: any, params: string[]) => {
         console.log("컨트랙트 배포 요청:", cont, params);
         // 컨트랙트 상세 정보 조회
-        const contractDetails = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/contracts/contract/get", { contId: cont.contId })
-            .then((response) => response.data.code === "SUCCESS" ? response.data.data : null)
-            .catch(() => null);
-        if (!contractDetails) {
-            alert("컨트랙트 상세 정보가 없습니다.");
-            return;
+        // const contractDetails = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/contracts/contract/get", { contId: cont.contId })
+        //     .then((response) => response.data.code === "SUCCESS" ? response.data.data : null)
+        //     .catch(() => null);
+        // const contractDetails = require('../../../HKRW.json');
+        // const contractDetails = require('../../../HanaKRW.json');
+        let contractDetails;
+        if(cont.contId == 0){
+            contractDetails = require('../../../HanaKRW.json');
+        } else if(cont.contId == 1){
+            contractDetails = require('../../../FiatTokenV2_2.json');
+        } else if(cont.contId == 2){
+            contractDetails = require('../../../FiatTokenProxy.json');
         }
 
+
+        // // 배포에 쓸 mokup 파라미터
+        // // name, symbol 스트링값 설정
+        // const deployParams = ["HanaKRW", "HKRW"]; // name, symbol 순서대로
+
+        // 배포할 토큰 이름과 심볼 정의
+        // const name = "HanaKRW Stablecoin";
+        // const symbol = "HKRW";
+        // const initialSupply = ethers.utils.parseUnits("1000000", 18); // 초기 공급량 (1,000,000 HKRW)
+
         // ABI로 컨트랙트 인터페이스 생성)
-        console.log("컨트랙트 상세 정보:", contractDetails);
-        const contractInterface = new ethers.utils.Interface(contractDetails.abiDtlsCtt);
+        // const contractInterface = new ethers.utils.Interface(contractDetails.abiDtlsCtt);
+        const contractInterface = new ethers.utils.Interface(contractDetails.abi);
 
         // 생성자 파라미터 인코딩딩
         const deployData = contractInterface.encodeDeploy(params);
+        // const deployData = contractInterface.encodeDeploy([name, symbol, initialSupply]);
+        console.log("배포 데이터:", deployData);
+
         const unsignedTx = {
             to: null,
             // 배포할때 bytecode + 생성자 파라미터 인코딩한 값값
-            data: contractDetails.byteCdDtlsCtt + deployData.replace("0x", ""),
+            data: contractDetails.bytecode + deployData.replace("0x", ""),
         };
         unsignedTxRef.current = unsignedTx;
 

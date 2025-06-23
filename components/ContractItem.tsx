@@ -36,14 +36,14 @@ const ContractItem = ({
                         <div className="text-gray-500">생성자 파라미터 없음</div>
                     ) : (
                         creatorParams.map((param, paramIdx) => (
-                            <div key={param.parmNm || paramIdx} className="flex items-center">
-                                <span className="w-32 text-gray-700">{param.paraNm}</span>
+                            <div key={param.name || paramIdx} className="flex items-center">
+                                <span className="w-32 text-gray-700">{param.name}</span>
                                 <input
                                     type="text"
                                     className="flex-1 p-1 border border-gray-300 rounded ml-2"
                                     value={inputValues[paramIdx] || ""}
                                     onChange={e => onInputChange(paramIdx, e.target.value)}
-                                    placeholder={param.parmNm}
+                                    placeholder={param.type}
                                 />
                             </div>
                         ))
